@@ -35,12 +35,47 @@ function detectAccident(event) {
 
         accidentDetected = true;
 
-        document.getElementById("status").innerText =
-            "🚨 Accident Detected";
+        navigator.geolocation.getCurrentPosition(
 
-        fetch("/alert", {
-            method: "POST"
-        });
+            function(position) {
+
+                let latitude =
+                    position.coords.latitude;
+
+                let longitude =
+                    position.coords.longitude;
+
+                document.getElementById("status").innerText =
+                    "🚨 Accident Detected";
+
+                fetch("/alert", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        latitude: latitude,
+                        longitude: longitude
+
+                    })
+
+                });
+
+            },
+
+            function(error) {
+
+                document.getElementById("status").innerText =
+                    "GPS Permission Denied";
+
+                console.log(error);
+            }
+
+        );
 
         window.removeEventListener(
             "devicemotion",
@@ -54,10 +89,10 @@ setInterval(checkStatus, 1000);
 function checkStatus() {
 
     fetch("/status")
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
 
-            if (data === "ACCIDENT") {
+            if (data.status === "ACCIDENT") {
 
                 const status =
                     document.getElementById("status");
@@ -65,19 +100,23 @@ function checkStatus() {
                 status.innerText =
                     "🚨 Accident Detected";
 
-                if (data === "ACCIDENT") {
+                status.classList.add("accident");
 
-                    const status =
-                        document.getElementById("status");
+                if (document.getElementById("location")) {
 
-                    status.innerText =
-                        "🚨 Accident Detected";
+                    document.getElementById("location").innerHTML =
 
-                    status.classList.add("accident");
+                        "📍 Latitude : " +
+                        data.latitude +
+
+                        "<br>📍 Longitude : " +
+                        data.longitude;
                 }
             }
         })
         .catch(error => {
+
             console.log(error);
+
         });
 }
