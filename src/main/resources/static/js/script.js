@@ -120,3 +120,59 @@ function checkStatus() {
 
         });
 }
+
+function checkStatus() {
+
+    fetch("/status")
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.status === "ACCIDENT") {
+
+                const status =
+                    document.getElementById("status");
+
+                status.innerText =
+                    "🚨 Accident Detected";
+
+                status.classList.add("accident");
+
+                document.getElementById("time")
+                    .innerText =
+                    "🕒 Time : " + data.time;
+
+                document.getElementById("location")
+                    .innerHTML =
+
+                    "📍 Latitude : " +
+                    data.latitude +
+
+                    "<br>📍 Longitude : " +
+                    data.longitude;
+
+                const mapLink =
+                    document.getElementById("mapLink");
+
+                mapLink.style.display =
+                    "inline-block";
+
+                mapLink.href =
+                    "https://maps.google.com/?q="
+                    + data.latitude +
+                    "," +
+                    data.longitude;
+            }
+        });
+}
+
+function resetSystem() {
+
+    fetch("/reset", {
+        method: "POST"
+    })
+    .then(() => {
+
+        location.reload();
+
+    });
+}

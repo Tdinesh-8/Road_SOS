@@ -2,6 +2,8 @@ package com.example.roadsos.controller;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +14,8 @@ public class AlertController {
 
     private double latitude;
     private double longitude;
+
+    private String accidentTime = "--";
 
     @PostMapping("/alert")
     public String receiveAlert(
@@ -27,13 +31,13 @@ public class AlertController {
             Double.parseDouble(
                 data.get("longitude").toString());
 
+        accidentTime =
+            LocalDateTime.now()
+            .format(
+                DateTimeFormatter.ofPattern(
+                    "dd-MM-yyyy HH:mm:ss"));
+
         System.out.println("🚨 ALERT RECEIVED");
-
-        System.out.println(
-            "Latitude : " + latitude);
-
-        System.out.println(
-            "Longitude : " + longitude);
 
         return "SUCCESS";
     }
@@ -47,7 +51,21 @@ public class AlertController {
         response.put("status", status);
         response.put("latitude", latitude);
         response.put("longitude", longitude);
+        response.put("time", accidentTime);
 
         return response;
+    }
+
+    @PostMapping("/reset")
+    public String reset() {
+
+        status = "WAITING";
+
+        latitude = 0;
+        longitude = 0;
+
+        accidentTime = "--";
+
+        return "RESET";
     }
 }
